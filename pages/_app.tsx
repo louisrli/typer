@@ -4,6 +4,7 @@ import {wrapper} from '../lib/store';
 
 const WrappedApp: FC<AppProps> = ({Component, pageProps}) => (
   <Component {...pageProps} />
+
 );
 
 export default wrapper.withRedux(WrappedApp);
