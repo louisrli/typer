@@ -7,13 +7,13 @@ export interface PhraseData {
   translations?: string[];
 }
 
-export const handleKeyPress = createAction(
+export const handleGameKeypress = createAction(
   'HANDLE_KEY_PRESS',
   (pressedKey: string) => ({ pressedKey })
 )();
 
 const actions = {
-  handleKeyPress,
+  handleGameKeypress,
 };
 
 type TypingActions = ActionType<typeof actions>;
@@ -30,7 +30,7 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
   currentPhraseIndex: 0,
   currentCharIndex: 0,
   isLastCharError: false,
-}).handleAction(handleKeyPress, (state, action) =>
+}).handleAction(handleGameKeypress, (state, action) =>
   produce(state, (draft) => {
     const currentPhraseData = state.phrasePool[state.currentPhraseIndex];
     if (!currentPhraseData) {

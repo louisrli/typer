@@ -1,6 +1,6 @@
 import { ActionType, createAction, createReducer } from 'typesafe-actions';
 
-export const handleKeypressStat = createAction(
+export const handleStatKeypress = createAction(
   'HANDLE_KEYPRESS_STAT',
   (key: string, phrase: string, currentCharIndex: number) => ({
     key,
@@ -9,7 +9,7 @@ export const handleKeypressStat = createAction(
   })
 )();
 
-const actions = { handleKeypressStat };
+const actions = { handleStatKeypress };
 
 type StatsActions = ActionType<typeof actions>;
 
@@ -19,6 +19,6 @@ interface StatsState {
 
 export const statsReducer = createReducer<StatsState, StatsActions>({
   hideTranslations: false,
-}).handleAction(handleKeypressStat, (state) => {
+}).handleAction(handleStatKeypress, (state) => {
   return state;
 });

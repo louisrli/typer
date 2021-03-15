@@ -1,19 +1,36 @@
+import { connect } from 'react-redux';
 import React from 'react';
-import { PhraseData } from '../../reducers/typing';
+import { handleGameKeypress, PhraseData } from '../../reducers/typing';
 import PhraseView from './PhraseView';
 import TranslationAndExamplesView from './TranslationAndExamplesView';
+import { RootState } from '../../lib/store';
+import { handleStatKeypress } from '../../reducers/stats';
 
-interface PhraseSessionProps {
-  // null when session has finished.
-  phraseData: PhraseData | null;
-  currentCharIndex: number;
-}
+const mapStateToProps = (state: RootState) => {
+  return {
+    phraseData:
+      state.typing.phrasePool[state.typing.currentPhraseIndex] || null,
+    currentCharIndex: state.typing.currentCharIndex,
+  };
+};
+
+const mapDispatchToProps = {
+  handleGameKeypress,
+  handleStatKeypress,
+};
+
+type PhraseSessionProps = ReturnType<typeof mapStateToProps> &
+  typeof mapDispatchToProps;
 
 const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   phraseData,
   currentCharIndex,
+  handleGameKeypress,
 }) => {
   React.useEffect(() => {
+    if (!phraseData) {
+      return;
+    }
     const handler = (e: KeyboardEvent) => {
       const isCorrect = e.key === phraseData.phrase[currentCharIndex];
       if (isCorrect) {
@@ -26,7 +43,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     return () => {
       document.removeEventListener('keydown', handler);
     };
-  }, []);
+  }, [phraseData]);
   return (
     <div>
       <PhraseView
@@ -41,4 +58,4 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   );
 };
 
-export default PhraseSessionView;
+export default connect(mapStateToProps, mapDispatchToProps)(PhraseSessionView);
