@@ -1,10 +1,9 @@
 import { combineReducers, createStore } from 'redux';
 import { MakeStore, createWrapper, Context, HYDRATE } from 'next-redux-wrapper';
-import { Action, StateType } from 'typesafe-actions';
-
-export interface State {
-  tick: string;
-}
+import { StateType } from 'typesafe-actions';
+import { typingReducer } from '../reducers/typing';
+import { statsReducer } from '../reducers/stats';
+import { settingsReducer } from '../reducers/settings';
 
 const rootReducer = combineReducers({
   typing: typingReducer,
@@ -14,7 +13,10 @@ const rootReducer = combineReducers({
 
 export type RootState = StateType<typeof rootReducer>;
 
-const reducer = (state: RootState, action) => {
+const reducer = (
+  state: RootState,
+  action: any
+): ReturnType<typeof rootReducer> => {
   // Copied this from documentation for redux next wrapper.
   if (action.type === HYDRATE) {
     const nextState = {

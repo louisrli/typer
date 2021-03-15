@@ -37,6 +37,7 @@ module.exports = {
     'import/prefer-default-export': 0,
     'no-console': ['error', { allow: ['warn', 'error', 'debug'] }],
     'react/no-unescaped-entities': 0,
+    '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '_' }],
     'no-restricted-syntax': 0,
     'arrow-body-style': 0,
     '@typescript-eslint/no-misused-promises': 'error',
