@@ -13,13 +13,10 @@ const rootReducer = combineReducers({
 
 export type RootState = StateType<typeof rootReducer>;
 
-const reducer = (
-  state: RootState,
-  action: any
-): ReturnType<typeof rootReducer> => {
+const reducer = (state: RootState | undefined, action: any): RootState => {
   // Copied this from documentation for redux next wrapper.
   if (action.type === HYDRATE) {
-    const nextState = {
+    const nextState: RootState = {
       ...state, // use previous state
       ...action.payload, // apply delta from hydration
     };
