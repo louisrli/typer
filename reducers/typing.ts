@@ -26,7 +26,13 @@ interface TypingState {
 }
 
 export const typingReducer = createReducer<TypingState, TypingActions>({
-  phrasePool: [],
+  phrasePool: [
+    {
+      phrase: 'foo',
+      examples: [['example0 foo bar', 'translation0 foo bar']],
+      translations: ['i am a definition'],
+    },
+  ],
   currentPhraseIndex: 0,
   currentCharIndex: 0,
   isLastCharError: false,

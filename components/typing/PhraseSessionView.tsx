@@ -45,7 +45,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   }, [phraseData]);
 
   if (!phraseData) {
-    return 'You finished.';
+    return <>You finished.</>;
   }
   return (
     <div>
