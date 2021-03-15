@@ -1,13 +1,13 @@
 import { ActionType, createAction, createReducer } from 'typesafe-actions';
 
-export const setHideTranslations = createAction(
+const setHideTranslations = createAction(
   'SET_HIDE_TRANSLATIONS',
   (hideTranslations: boolean) => ({ hideTranslations })
 )();
 
-const actions = { setHideTranslations };
+export const settingsActions = { setHideTranslations };
 
-type SettingsActions = ActionType<typeof actions>;
+type SettingsActions = ActionType<typeof settingsActions>;
 
 interface SettingsState {
   hideTranslations: boolean;

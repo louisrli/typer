@@ -7,16 +7,16 @@ export interface PhraseData {
   translations?: string[];
 }
 
-export const handleGameKeypress = createAction(
-  'HANDLE_KEY_PRESS',
+const handleGameKeypress = createAction(
+  'HANDLE_GAME_KEY_PRESS',
   (pressedKey: string) => ({ pressedKey })
 )();
 
-const actions = {
+export const typingActions = {
   handleGameKeypress,
 };
 
-type TypingActions = ActionType<typeof actions>;
+type TypingActions = ActionType<typeof typingActions>;
 
 interface TypingState {
   phrasePool: PhraseData[];
