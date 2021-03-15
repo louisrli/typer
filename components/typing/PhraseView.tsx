@@ -3,14 +3,14 @@ import CharacterView from './CharacterView';
 
 interface PhraseProps {
   phrase: string;
-  currentIndex: number;
+  currentCharIndex: number;
 }
 
-const PhraseView: React.FC<PhraseProps> = ({ phrase, currentIndex }) => {
+const PhraseView: React.FC<PhraseProps> = ({ phrase, currentCharIndex }) => {
   return (
     <div>
       {phrase.split('').map((c, i) => (
-        <CharacterView char={c} isCurrent={currentIndex === i} />
+        <CharacterView char={c} isCurrent={currentCharIndex === i} />
       ))}
     </div>
   );

@@ -1,25 +1,34 @@
-import { createStore, AnyAction } from 'redux';
+import { combineReducers, createStore } from 'redux';
 import { MakeStore, createWrapper, Context, HYDRATE } from 'next-redux-wrapper';
+import { Action, StateType } from 'typesafe-actions';
 
 export interface State {
   tick: string;
 }
 
-// create your reducer
-const reducer = (state: State = { tick: 'init' }, action: AnyAction) => {
-  switch (action.type) {
-    case HYDRATE:
-      // Attention! This will overwrite client state! Real apps should use proper reconciliation.
-      return { ...state, ...action.payload };
-    case 'TICK':
-      return { ...state, tick: action.payload };
-    default:
-      return state;
+const rootReducer = combineReducers({
+  typing: typingReducer,
+  settings: settingsReducer,
+  stats: statsReducer,
+});
+
+export type RootState = StateType<typeof rootReducer>;
+
+const reducer = (state: RootState, action) => {
+  // Copied this from documentation for redux next wrapper.
+  if (action.type === HYDRATE) {
+    const nextState = {
+      ...state, // use previous state
+      ...action.payload, // apply delta from hydration
+    };
+    return nextState;
   }
+  return rootReducer(state, action);
 };
 
 // create a makeStore function
-const makeStore: MakeStore<State> = (context: Context) => createStore(reducer);
+const makeStore: MakeStore<RootState> = (context: Context) =>
+  createStore(reducer);
 
 // export an assembled wrapper
-export const wrapper = createWrapper<State>(makeStore, { debug: true });
+export const wrapper = createWrapper<RootState>(makeStore, { debug: true });
