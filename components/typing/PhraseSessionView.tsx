@@ -1,10 +1,10 @@
 import { connect } from 'react-redux';
 import React from 'react';
-import { handleGameKeypress, PhraseData } from '../../reducers/typing';
+import { typingActions } from '../../reducers/typing';
 import PhraseView from './PhraseView';
 import TranslationAndExamplesView from './TranslationAndExamplesView';
 import { RootState } from '../../lib/store';
-import { handleStatKeypress } from '../../reducers/stats';
+import { statsActions } from '../../reducers/stats';
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -15,8 +15,8 @@ const mapStateToProps = (state: RootState) => {
 };
 
 const mapDispatchToProps = {
-  handleGameKeypress,
-  handleStatKeypress,
+  handleGameKeypress: typingActions.handleGameKeypress,
+  handleStatKeypress: statsActions.handleStatKeypress,
 };
 
 type PhraseSessionProps = ReturnType<typeof mapStateToProps> &
@@ -26,17 +26,16 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   phraseData,
   currentCharIndex,
   handleGameKeypress,
+  handleStatKeypress,
 }) => {
   React.useEffect(() => {
     if (!phraseData) {
-      return;
+      return undefined;
     }
     const handler = (e: KeyboardEvent) => {
-      const isCorrect = e.key === phraseData.phrase[currentCharIndex];
-      if (isCorrect) {
-        console.log('foo');
-      } else {
-      }
+      const pressedKey = e.key;
+      handleGameKeypress(pressedKey);
+      handleStatKeypress(pressedKey, phraseData.phrase, currentCharIndex);
     };
     document.addEventListener('keydown', handler);
 
@@ -44,6 +43,10 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
       document.removeEventListener('keydown', handler);
     };
   }, [phraseData]);
+
+  if (!phraseData) {
+    return 'You finished.';
+  }
   return (
     <div>
       <PhraseView
