@@ -3,10 +3,10 @@ import React from 'react';
 import styled from '@emotion/styled';
 import { typingActions } from '../../reducers/typing';
 import PhraseView from './PhraseView';
-import TranslationAndExamplesView from './TranslationAndExamplesView';
+import DefinitionAndExamplesView from './TranslationAndExamplesView';
 import { RootState } from '../../lib/store';
 import { statsActions } from '../../reducers/stats';
-import { Space } from '../common/Styles';
+import { Colors, Space } from '../common/Styles';
 
 const PhraseSessionDiv = styled.div`
   display: flex;
@@ -14,10 +14,12 @@ const PhraseSessionDiv = styled.div`
   justify-content: center;
   align-items: center;
   margin: 0 auto;
-  border: 1px solid grey;
+  border: 1px solid ${Colors.neutrals[300]};
   border-radius: ${Space[4]};
-  max-width: 800px;
+  max-width: 600px;
   min-height: 600px;
+  width: 100%;
+  padding: 0 ${Space[64]};
 `;
 
 const mapStateToProps = (state: RootState) => {
@@ -66,20 +68,21 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     window.speechSynthesis.speak(speech);
   }, [currentPhraseIteration]);
 
-  if (!phraseData) {
-    return <>You finished.</>;
-  }
-
   return (
     <PhraseSessionDiv>
-      <PhraseView
-        phrase={phraseData.phrase}
-        currentCharIndex={currentCharIndex}
-      />
-      <TranslationAndExamplesView
-        translations={phraseData.translations}
-        examples={phraseData.examples}
-      />
+      {phraseData && (
+        <>
+          <PhraseView
+            phrase={phraseData.phrase}
+            currentCharIndex={currentCharIndex}
+          />
+          <DefinitionAndExamplesView
+            definitions={phraseData.definitions}
+            examples={phraseData.examples}
+          />
+        </>
+      )}
+      {!phraseData && <div>You've finished.</div>}
     </PhraseSessionDiv>
   );
 };

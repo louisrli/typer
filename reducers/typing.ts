@@ -1,10 +1,27 @@
 import produce from 'immer';
 import { ActionType, createAction, createReducer } from 'typesafe-actions';
 
+// Not sure if there's a better way. We don't want things like alt-tabbing etc
+// to be counted.
+const IGNORED_KEYS = new Set([
+  'Alt',
+  'Meta',
+  'Tab',
+  'Control',
+  'Insert',
+  'Home',
+  'Backspace',
+  'Delete',
+  'PageUp',
+  'PageDown',
+  'ContextMenu',
+  'CapsLock',
+]);
+
 export interface PhraseData {
   phrase: string;
   examples?: [string, string][];
-  translations?: string[];
+  definitions?: string[];
 }
 
 const setPhrasePool = createAction(
@@ -14,6 +31,7 @@ const setPhrasePool = createAction(
 
 const handleGameKeypress = createAction(
   'HANDLE_GAME_KEY_PRESS',
+  // JS "key" field.
   (pressedKey: string) => ({ pressedKey })
 )();
 
@@ -44,9 +62,15 @@ interface TypingState {
 export const typingReducer = createReducer<TypingState, TypingActions>({
   phrasePool: [
     {
-      phrase: 'foo',
-      examples: [['example0 foo bar', 'translation0 foo bar']],
-      translations: ['i am a definition'],
+      phrase: 'да',
+      examples: [
+        ['example0 foo bar', 'translation0 foo bar'],
+        [
+          'example0 foo bar longer sentence maybe',
+          'translation0 foo bar ya ya biatches',
+        ],
+      ],
+      definitions: ['i am a definition'],
     },
   ],
   currentPhraseIndex: 0,
@@ -57,6 +81,10 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
 })
   .handleAction(handleGameKeypress, (state, action) =>
     produce(state, (draft) => {
+      if (IGNORED_KEYS.has(action.payload.pressedKey)) {
+        return;
+      }
+
       const currentPhraseData = state.phrasePool[state.currentPhraseIndex];
       if (!currentPhraseData) {
         return;

@@ -4,7 +4,7 @@ import { Space } from '../common/Styles';
 import CharacterView from './CharacterView';
 
 const PhraseContainerDiv = styled.div`
-  font-size: ${Space[36]};
+  font-size: ${Space[48]};
   // Note that character view should be a flex-child of these, thus there's some
   // cross-component CSS going on here.
   display: flex;
