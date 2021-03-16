@@ -14,13 +14,15 @@ const PhraseSessionDiv = styled.div`
   justify-content: center;
   align-items: center;
   margin: 0 auto;
-  border-radius: ${Space[4]};
+  border-radius: ${Space[16]};
   box-shadow: 2px;
-  max-width: 600px;
+  max-width: 800px;
   min-height: 600px;
   width: 100%;
   padding: 0 ${Space[64]};
   background-color: ${Colors.primary[100]};
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 `;
 
 const mapStateToProps = (state: RootState) => {

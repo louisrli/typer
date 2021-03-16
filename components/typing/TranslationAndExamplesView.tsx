@@ -16,7 +16,11 @@ const DefinitionsDiv = styled.div`
 
 const ExamplesTable = styled.table`
   width: 100%;
-  padding: ${Space[8]};
+  td {
+    padding-right: ${Space[12]};
+    padding-bottom: ${Space[16]};
+  }
+  font-size: ${Space[16]};
 `;
 
 interface DefinitionAndExamplesProps {
