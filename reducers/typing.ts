@@ -32,7 +32,10 @@ const setPhrasePool = createAction(
 const handleGameKeypress = createAction(
   'HANDLE_GAME_KEY_PRESS',
   // JS "key" field.
-  (pressedKey: string) => ({ pressedKey })
+  (pressedKey: string, numRequiredPhraseIterations: number) => ({ pressedKey }),
+  (pressedKey: string, numRequiredPhraseIterations: number) => ({
+    numRequiredPhraseIterations,
+  })
 )();
 
 export const typingActions = {
@@ -41,10 +44,6 @@ export const typingActions = {
 };
 
 type TypingActions = ActionType<typeof typingActions>;
-
-// The number of times a phrase needs to be typed correctly to move on to the
-// next one.
-const NUM_CORRECT_PHRASE_ITERATIONS = 3;
 
 interface TypingState {
   phrasePool: PhraseData[];
@@ -62,7 +61,7 @@ interface TypingState {
 export const typingReducer = createReducer<TypingState, TypingActions>({
   phrasePool: [
     {
-      phrase: 'да',
+      phrase: 'foo',
       examples: [
         ['example0 foo bar', 'translation0 foo bar'],
         [
@@ -105,7 +104,10 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
           draft.currentCharIndex = 0;
 
           draft.currentPhraseIteration++;
-          if (draft.currentPhraseIteration === NUM_CORRECT_PHRASE_ITERATIONS) {
+          if (
+            draft.currentPhraseIteration ===
+            action.meta.numRequiredPhraseIterations
+          ) {
             // Move onto the next phrase.
             draft.currentPhraseIteration = 0;
             draft.currentPhraseIndex++;

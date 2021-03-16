@@ -7,6 +7,7 @@ import DefinitionAndExamplesView from './TranslationAndExamplesView';
 import { RootState } from '../../lib/store';
 import { statsActions } from '../../reducers/stats';
 import { Colors, Space } from '../common/Styles';
+import PhraseIterationProgressView from './PhraseIterationProgressView';
 
 const PhraseSessionDiv = styled.div`
   display: flex;
@@ -31,6 +32,7 @@ const mapStateToProps = (state: RootState) => {
       state.typing.phrasePool[state.typing.currentPhraseIndex] || null,
     currentCharIndex: state.typing.currentCharIndex,
     currentPhraseIteration: state.typing.currentPhraseIteration,
+    numRequiredPhraseIterations: state.settings.numRequiredPhraseIterations,
   };
 };
 
@@ -46,6 +48,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   phraseData,
   currentCharIndex,
   currentPhraseIteration,
+  numRequiredPhraseIterations,
   handleGameKeypress,
   handleStatKeypress,
 }) => {
@@ -55,7 +58,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     }
     const handler = (e: KeyboardEvent) => {
       const pressedKey = e.key;
-      handleGameKeypress(pressedKey);
+      handleGameKeypress(pressedKey, numRequiredPhraseIterations);
       handleStatKeypress(pressedKey, phraseData.phrase, currentCharIndex);
     };
     document.addEventListener('keydown', handler);
@@ -78,6 +81,10 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
           <PhraseView
             phrase={phraseData.phrase}
             currentCharIndex={currentCharIndex}
+          />
+          <PhraseIterationProgressView
+            currentPhraseIteration={currentPhraseIteration}
+            numRequiredPhraseIterations={numRequiredPhraseIterations}
           />
           <DefinitionAndExamplesView
             definitions={phraseData.definitions}
