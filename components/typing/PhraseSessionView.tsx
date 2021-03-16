@@ -9,6 +9,23 @@ import { statsActions } from '../../reducers/stats';
 import { Colors, Space } from '../common/Styles';
 import PhraseIterationProgressView from './PhraseIterationProgressView';
 
+// Not sure if there's a better way. We don't want things like alt-tabbing etc
+// to be counted.
+const IGNORED_KEYS = new Set([
+  'Alt',
+  'Meta',
+  'Tab',
+  'Control',
+  'Insert',
+  'Home',
+  'Backspace',
+  'Delete',
+  'PageUp',
+  'PageDown',
+  'ContextMenu',
+  'CapsLock',
+]);
+
 const PhraseSessionDiv = styled.div`
   display: flex;
   flex-direction: column;
@@ -58,6 +75,9 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     }
     const handler = (e: KeyboardEvent) => {
       const pressedKey = e.key;
+      if (IGNORED_KEYS.has(pressedKey)) {
+        return;
+      }
       handleGameKeypress(pressedKey, numRequiredPhraseIterations);
       handleStatKeypress(pressedKey, phraseData.phrase, currentCharIndex);
     };
