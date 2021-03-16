@@ -13,12 +13,20 @@ export const statsActions = { handleStatKeypress };
 
 type StatsActions = ActionType<typeof statsActions>;
 
+type Counter = Map<string, number>;
+
 interface StatsState {
-  hideTranslations: boolean;
+  mistakesPerChar: Counter;
+  mistakesPerPhrase: Counter;
+  numErrorKeyPresses: number;
+  numCorrectKeyPresses: number;
 }
 
 export const statsReducer = createReducer<StatsState, StatsActions>({
-  hideTranslations: false,
+  mistakesPerChar: new Map<string, number>(),
+  mistakesPerPhrase: new Map<string, number>(),
+  numErrorKeyPresses: 0,
+  numCorrectKeyPresses: 0,
 }).handleAction(handleStatKeypress, (state) => {
   return state;
 });
