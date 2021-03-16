@@ -1,6 +1,9 @@
 import produce from 'immer';
 import { ActionType, createAction, createReducer } from 'typesafe-actions';
 
+// Every N keys, take a snapshot of the accuracy history.
+const ACCURACY_HISTORY_FREQUENCY = 100;
+
 const handleStatKeypress = createAction(
   'HANDLE_KEYPRESS_STAT',
   (pressedKey: string, phrase: string, currentCharIndex: number) => ({
@@ -21,6 +24,9 @@ interface StatsState {
   mistakesPerPhrase: Counter;
   numErrorKeyPresses: number;
   numCorrectKeyPresses: number;
+  // Recording every key stroke is a bit too tedious, so let's take a snapshot
+  // every N keystrokes for now.
+  accuracyHistory: number[];
 }
 
 const incrementCounter = (key: string, counter: Counter): void => {
@@ -37,6 +43,7 @@ export const statsReducer = createReducer<StatsState, StatsActions>({
   mistakesPerPhrase: new Map<string, number>(),
   numErrorKeyPresses: 0,
   numCorrectKeyPresses: 0,
+  accuracyHistory: [],
 }).handleAction(handleStatKeypress, (state, action) =>
   produce(state, (draft) => {
     const correctChar = action.payload.phrase[action.payload.currentCharIndex];
@@ -47,6 +54,15 @@ export const statsReducer = createReducer<StatsState, StatsActions>({
       draft.numErrorKeyPresses++;
       incrementCounter(correctChar, draft.mistakesPerChar);
       incrementCounter(action.payload.phrase, draft.mistakesPerPhrase);
+    }
+
+    const totalKeyPresses =
+      draft.numCorrectKeyPresses + draft.numErrorKeyPresses;
+    if (totalKeyPresses % ACCURACY_HISTORY_FREQUENCY === 0) {
+      draft.accuracyHistory.push(
+        draft.numCorrectKeyPresses /
+          (draft.numCorrectKeyPresses + draft.numErrorKeyPresses)
+      );
     }
   })
 );

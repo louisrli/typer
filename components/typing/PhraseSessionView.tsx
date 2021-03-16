@@ -14,6 +14,7 @@ import PhraseIterationProgressView from './PhraseIterationProgressView';
 const IGNORED_KEYS = new Set([
   'Alt',
   'Meta',
+  'Shift',
   'Tab',
   'Control',
   'Insert',
@@ -75,7 +76,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     }
     const handler = (e: KeyboardEvent) => {
       const pressedKey = e.key;
-      if (IGNORED_KEYS.has(pressedKey)) {
+      if (IGNORED_KEYS.has(pressedKey) || e.ctrlKey) {
         return;
       }
       handleGameKeypress(pressedKey, numRequiredPhraseIterations);
