@@ -18,11 +18,21 @@ export const typingActions = {
 
 type TypingActions = ActionType<typeof typingActions>;
 
+// The number of times a phrase needs to be typed correctly to move on to the
+// next one.
+const NUM_CORRECT_PHRASE_ITERATIONS = 3;
+
 interface TypingState {
   phrasePool: PhraseData[];
+  // The current index of the phrase in phrase pool.
   currentPhraseIndex: number;
+  // Each phrase needs to be done NUM_CORRECT_PHRASE_ITERATIONS times.
+  currentPhraseIteration: number;
+  // The current index of the character within the given phrase.
   currentCharIndex: number;
+  // If the user made an error in the last key type.
   isLastKeyError: boolean;
+  hasErrorOnCurrentPhrase: boolean;
 }
 
 export const typingReducer = createReducer<TypingState, TypingActions>({
@@ -34,8 +44,10 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
     },
   ],
   currentPhraseIndex: 0,
+  currentPhraseIteration: 0,
   currentCharIndex: 0,
   isLastKeyError: false,
+  hasErrorOnCurrentPhrase: false,
 }).handleAction(handleGameKeypress, (state, action) =>
   produce(state, (draft) => {
     const currentPhraseData = state.phrasePool[state.currentPhraseIndex];
@@ -49,16 +61,24 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
       return draft;
     }
 
-    if (action.payload.pressedKey === correctChar) {
-      draft.isLastKeyError = false;
-      if (draft.currentCharIndex === currentPhraseData.phrase.length - 1) {
+    const isCorrectKey = action.payload.pressedKey === correctChar;
+    draft.isLastKeyError = !isCorrectKey;
+    if (isCorrectKey) {
+      const isOnLastCharacter =
+        draft.currentCharIndex === currentPhraseData.phrase.length - 1;
+      if (isOnLastCharacter) {
         draft.currentCharIndex = 0;
-        draft.currentPhraseIndex++;
+
+        draft.currentPhraseIteration++;
+        if (draft.currentPhraseIteration === NUM_CORRECT_PHRASE_ITERATIONS) {
+          // Move onto the next phrase.
+          draft.currentPhraseIteration = 0;
+          draft.currentPhraseIndex++;
+        }
+        // Implicit fallthrough branch -- stay on current phrase.
       } else {
         draft.currentCharIndex++;
       }
-    } else {
-      draft.isLastKeyError = true;
     }
     return draft;
   })

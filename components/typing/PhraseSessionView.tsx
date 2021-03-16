@@ -25,6 +25,7 @@ const mapStateToProps = (state: RootState) => {
     phraseData:
       state.typing.phrasePool[state.typing.currentPhraseIndex] || null,
     currentCharIndex: state.typing.currentCharIndex,
+    currentPhraseIteration: state.typing.currentPhraseIteration,
   };
 };
 
@@ -39,6 +40,7 @@ type PhraseSessionProps = ReturnType<typeof mapStateToProps> &
 const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   phraseData,
   currentCharIndex,
+  currentPhraseIteration,
   handleGameKeypress,
   handleStatKeypress,
 }) => {
@@ -62,7 +64,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     const speech = new SpeechSynthesisUtterance('спасиво');
     speech.lang = 'ru';
     window.speechSynthesis.speak(speech);
-  }, [phraseData]);
+  }, [currentPhraseIteration]);
 
   if (!phraseData) {
     return <>You finished.</>;

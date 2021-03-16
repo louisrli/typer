@@ -15,6 +15,7 @@ const MarkerDiv = styled.div`
   // This hack prevents it from shifting the letters from the space it takes up.
   // However, it still takes vertical height.
   width: 0;
+  margin-top: -${Space[8]};
 `;
 
 const CharacterContainerDiv = styled.div<{ isError: boolean }>`
