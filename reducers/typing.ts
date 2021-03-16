@@ -7,6 +7,11 @@ export interface PhraseData {
   translations?: string[];
 }
 
+const setPhrasePool = createAction(
+  'SET_PHRASE_POOL',
+  (phrasePool: PhraseData[]) => ({ phrasePool })
+)();
+
 const handleGameKeypress = createAction(
   'HANDLE_GAME_KEY_PRESS',
   (pressedKey: string) => ({ pressedKey })
@@ -14,6 +19,7 @@ const handleGameKeypress = createAction(
 
 export const typingActions = {
   handleGameKeypress,
+  setPhrasePool,
 };
 
 type TypingActions = ActionType<typeof typingActions>;
@@ -48,38 +54,43 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
   currentCharIndex: 0,
   isLastKeyError: false,
   hasErrorOnCurrentPhrase: false,
-}).handleAction(handleGameKeypress, (state, action) =>
-  produce(state, (draft) => {
-    const currentPhraseData = state.phrasePool[state.currentPhraseIndex];
-    if (!currentPhraseData) {
-      return draft;
-    }
-
-    const correctChar = currentPhraseData.phrase[state.currentCharIndex];
-    if (!correctChar) {
-      // TODO(louisli): this should be a fatal error
-      return draft;
-    }
-
-    const isCorrectKey = action.payload.pressedKey === correctChar;
-    draft.isLastKeyError = !isCorrectKey;
-    if (isCorrectKey) {
-      const isOnLastCharacter =
-        draft.currentCharIndex === currentPhraseData.phrase.length - 1;
-      if (isOnLastCharacter) {
-        draft.currentCharIndex = 0;
-
-        draft.currentPhraseIteration++;
-        if (draft.currentPhraseIteration === NUM_CORRECT_PHRASE_ITERATIONS) {
-          // Move onto the next phrase.
-          draft.currentPhraseIteration = 0;
-          draft.currentPhraseIndex++;
-        }
-        // Implicit fallthrough branch -- stay on current phrase.
-      } else {
-        draft.currentCharIndex++;
+})
+  .handleAction(handleGameKeypress, (state, action) =>
+    produce(state, (draft) => {
+      const currentPhraseData = state.phrasePool[state.currentPhraseIndex];
+      if (!currentPhraseData) {
+        return;
       }
-    }
-    return draft;
-  })
-);
+
+      const correctChar = currentPhraseData.phrase[state.currentCharIndex];
+      if (!correctChar) {
+        // TODO(louisli): this should be a fatal error
+        return;
+      }
+
+      const isCorrectKey = action.payload.pressedKey === correctChar;
+      draft.isLastKeyError = !isCorrectKey;
+      if (isCorrectKey) {
+        const isOnLastCharacter =
+          draft.currentCharIndex === currentPhraseData.phrase.length - 1;
+        if (isOnLastCharacter) {
+          draft.currentCharIndex = 0;
+
+          draft.currentPhraseIteration++;
+          if (draft.currentPhraseIteration === NUM_CORRECT_PHRASE_ITERATIONS) {
+            // Move onto the next phrase.
+            draft.currentPhraseIteration = 0;
+            draft.currentPhraseIndex++;
+          }
+          // Implicit fallthrough branch -- stay on current phrase.
+        } else {
+          draft.currentCharIndex++;
+        }
+      }
+    })
+  )
+  .handleAction(setPhrasePool, (state, action) =>
+    produce(state, (draft) => {
+      draft.phrasePool = action.payload.phrasePool;
+    })
+  );
