@@ -11,8 +11,8 @@ const TranslationAndExamplesView: React.FC<TranslationAndExamplesProps> = ({
 }) => {
   return (
     <div>
-      {translations}
-      {examples}
+      <div>{translations}</div>
+      <div>{examples}</div>
     </div>
   );
 };

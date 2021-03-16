@@ -22,7 +22,7 @@ interface TypingState {
   phrasePool: PhraseData[];
   currentPhraseIndex: number;
   currentCharIndex: number;
-  isLastCharError: boolean;
+  isLastKeyError: boolean;
 }
 
 export const typingReducer = createReducer<TypingState, TypingActions>({
@@ -35,7 +35,7 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
   ],
   currentPhraseIndex: 0,
   currentCharIndex: 0,
-  isLastCharError: false,
+  isLastKeyError: false,
 }).handleAction(handleGameKeypress, (state, action) =>
   produce(state, (draft) => {
     const currentPhraseData = state.phrasePool[state.currentPhraseIndex];
@@ -50,6 +50,7 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
     }
 
     if (action.payload.pressedKey === correctChar) {
+      draft.isLastKeyError = false;
       if (draft.currentCharIndex === currentPhraseData.phrase.length - 1) {
         draft.currentCharIndex = 0;
         draft.currentPhraseIndex++;
@@ -57,7 +58,7 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
         draft.currentCharIndex++;
       }
     } else {
-      draft.isLastCharError = true;
+      draft.isLastKeyError = true;
     }
     return draft;
   })

@@ -1,10 +1,24 @@
 import { connect } from 'react-redux';
 import React from 'react';
+import styled from '@emotion/styled';
 import { typingActions } from '../../reducers/typing';
 import PhraseView from './PhraseView';
 import TranslationAndExamplesView from './TranslationAndExamplesView';
 import { RootState } from '../../lib/store';
 import { statsActions } from '../../reducers/stats';
+import { Space } from '../common/Styles';
+
+const PhraseSessionDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  border: 1px solid grey;
+  border-radius: ${Space[4]};
+  max-width: 800px;
+  min-height: 600px;
+`;
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -44,11 +58,18 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     };
   }, [phraseData]);
 
+  React.useEffect(() => {
+    const speech = new SpeechSynthesisUtterance('спасиво');
+    speech.lang = 'ru';
+    window.speechSynthesis.speak(speech);
+  }, [phraseData]);
+
   if (!phraseData) {
     return <>You finished.</>;
   }
+
   return (
-    <div>
+    <PhraseSessionDiv>
       <PhraseView
         phrase={phraseData.phrase}
         currentCharIndex={currentCharIndex}
@@ -57,7 +78,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
         translations={phraseData.translations}
         examples={phraseData.examples}
       />
-    </div>
+    </PhraseSessionDiv>
   );
 };
 
