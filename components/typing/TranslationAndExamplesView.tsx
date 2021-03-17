@@ -34,13 +34,13 @@ const DefinitionAndExamplesView: React.FC<DefinitionAndExamplesProps> = ({
 }) => {
   return (
     <ContainerDiv>
-      {definitions && <DefinitionsDiv>{definitions.join(',')}</DefinitionsDiv>}
+      {definitions && <DefinitionsDiv>{definitions.join(', ')}</DefinitionsDiv>}
       {examples && (
         <ExamplesTable>
           <tbody>
             {examples.map((ex) => {
               return (
-                <tr>
+                <tr key={ex[0]}>
                   <td>{ex[0]}</td>
                   <td>{ex[1]}</td>
                 </tr>

@@ -7,6 +7,8 @@ import { Colors, Space } from '../common/Styles';
 // Each of these are a flex-item from the parent div.
 const CharacterDiv = styled.div<{ isCurrent: boolean }>`
   font-weight: ${(props) => (props.isCurrent ? 'bold' : 'unset')};
+  // Without this, white-space character divs disappear.
+  white-space: pre;
 `;
 
 const MarkerDiv = styled.div`
@@ -33,9 +35,13 @@ interface CharacterProps {
 const CharacterView: React.FC<
   CharacterProps & ReturnType<typeof mapStateToProps>
 > = ({ char, isCurrent, isLastKeyError }) => {
+  // We do a "hack" of replacing whitespace with a bunch to increase the visual
+  // spacing on whitespace chars.
   return (
     <CharacterContainerDiv isError={isLastKeyError && isCurrent}>
-      <CharacterDiv isCurrent={isCurrent}>{char}</CharacterDiv>
+      <CharacterDiv isCurrent={isCurrent}>
+        {char.replace(' ', '  ')}
+      </CharacterDiv>
       {isCurrent && <MarkerDiv>&#9650;</MarkerDiv>}
     </CharacterContainerDiv>
   );

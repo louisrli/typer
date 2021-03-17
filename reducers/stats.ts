@@ -17,7 +17,7 @@ export const statsActions = { handleStatKeypress };
 
 type StatsActions = ActionType<typeof statsActions>;
 
-type Counter = Map<string, number>;
+type Counter = Record<string, number>;
 
 interface StatsState {
   mistakesPerChar: Counter;
@@ -30,17 +30,17 @@ interface StatsState {
 }
 
 const incrementCounter = (key: string, counter: Counter): void => {
-  const val = counter.get(key);
+  const val = counter[key];
   if (val) {
-    counter.set(key, val + 1);
+    counter[key] = val + 1;
   } else {
-    counter.set(key, 1);
+    counter[key] = 1;
   }
 };
 
 export const statsReducer = createReducer<StatsState, StatsActions>({
-  mistakesPerChar: new Map<string, number>(),
-  mistakesPerPhrase: new Map<string, number>(),
+  mistakesPerChar: {},
+  mistakesPerPhrase: {},
   numErrorKeyPresses: 0,
   numCorrectKeyPresses: 0,
   accuracyHistory: [],
