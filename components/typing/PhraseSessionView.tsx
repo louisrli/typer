@@ -1,13 +1,13 @@
 import { connect } from 'react-redux';
 import React from 'react';
-import styled from '@emotion/styled';
+import clsx from 'clsx';
 import { typingActions } from '../../reducers/typing';
 import PhraseView from './PhraseView';
 import DefinitionAndExamplesView from './TranslationAndExamplesView';
 import { RootState } from '../../lib/store';
 import { statsActions } from '../../reducers/stats';
-import { Colors, Space } from '../common/Styles';
 import PhraseIterationProgressView from './PhraseIterationProgressView';
+import StatsView from './StatsView';
 
 // Not sure if there's a better way. We don't want things like alt-tabbing etc
 // to be counted.
@@ -26,23 +26,6 @@ const IGNORED_KEYS = new Set([
   'ContextMenu',
   'CapsLock',
 ]);
-
-const PhraseSessionDiv = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-  border-radius: ${Space[16]};
-  box-shadow: 2px;
-  max-width: 800px;
-  min-height: 600px;
-  width: 100%;
-  padding: 0 ${Space[64]};
-  background-color: ${Colors.primary[100]};
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-`;
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -99,7 +82,15 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   }, [currentPhraseIteration]);
 
   return (
-    <PhraseSessionDiv>
+    <div
+      className={clsx([
+        'flex flex-col justify-center items-center',
+        'mx-auto p-16',
+        'max-w-4xl h-full',
+        'rounded-2xl shadow-md',
+        'bg-blue-50',
+      ])}
+    >
       {phraseData && (
         <>
           <PhraseView
@@ -117,7 +108,8 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
         </>
       )}
       {!phraseData && <div>You've finished.</div>}
-    </PhraseSessionDiv>
+      <StatsView />
+    </div>
   );
 };
 
