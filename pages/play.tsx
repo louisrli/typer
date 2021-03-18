@@ -17,6 +17,7 @@ const OUR_JANK_DATABASE =
   'https://gist.githubusercontent.com/louisrli/43a875b34c76c1cb80ad3f8b1bcef623/raw/1e6dba05dd7c599b6f73d2a89b473cd9cc3316fd/ru';
 export const getServerSideProps = wrapper.getServerSideProps(
   async ({ store, query }) => {
+    // When you call init, it needs to delete the redux persist too.
     if (!query.init) {
       return;
     }
