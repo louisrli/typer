@@ -1,21 +1,9 @@
 import styled from '@emotion/styled';
+import clsx from 'clsx';
 import React from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../../lib/store';
 import { Colors, Space } from '../common/Styles';
-
-// Each of these are a flex-item from the parent div.
-const CharacterDiv = styled.div<{ isCurrent: boolean }>`
-  font-weight: ${(props) => (props.isCurrent ? 'bold' : 'unset')};
-  // Without this, white-space character divs disappear.
-  white-space: pre;
-`;
-
-const MarkerDiv = styled.div`
-  font-size: ${Space[16]};
-  text-align: center;
-  margin-top: -${Space[8]};
-`;
 
 const CharacterContainerDiv = styled.div<{ isError: boolean }>`
   color: ${(props) => (props.isError ? Colors.red[600] : 'unset')}; ;
@@ -39,10 +27,17 @@ const CharacterView: React.FC<
   // spacing on whitespace chars.
   return (
     <CharacterContainerDiv isError={isLastKeyError && isCurrent}>
-      <CharacterDiv isCurrent={isCurrent}>
+      <span
+        className={clsx({
+          'font-bold': isCurrent,
+          'whitespace-pre': true,
+        })}
+      >
         {char.replace(' ', '  ')}
-      </CharacterDiv>
-      {isCurrent && <MarkerDiv>&#9650;</MarkerDiv>}
+      </span>
+      {isCurrent && (
+        <div className="-mt-1 text-base text-center select-none">&#9650;</div>
+      )}
     </CharacterContainerDiv>
   );
 };

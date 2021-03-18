@@ -57,9 +57,19 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     if (!phraseData) {
       return undefined;
     }
+    const speech = new SpeechSynthesisUtterance(phraseData.phrase);
+    speech.rate = 0.8;
+    speech.lang = 'ru';
+    window.speechSynthesis.speak(speech);
+
     const handler = (e: KeyboardEvent) => {
       const pressedKey = e.key;
       if (IGNORED_KEYS.has(pressedKey) || e.ctrlKey) {
+        return;
+      }
+      // Hotkey for speaking again.
+      if (e.code === 'Backquote') {
+        window.speechSynthesis.speak(speech);
         return;
       }
       handleGameKeypress(pressedKey, numRequiredPhraseIterations);
@@ -74,11 +84,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
 
   React.useEffect(() => {
     if (!phraseData.phrase) {
-      return;
     }
-    const speech = new SpeechSynthesisUtterance(phraseData.phrase);
-    speech.lang = 'ru';
-    window.speechSynthesis.speak(speech);
   }, [currentPhraseIteration]);
 
   return (
