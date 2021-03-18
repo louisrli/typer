@@ -90,7 +90,10 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   }, [phraseData]);
 
   React.useEffect(() => {
-    const speech = new SpeechSynthesisUtterance('спасиво');
+    if (!phraseData.phrase) {
+      return;
+    }
+    const speech = new SpeechSynthesisUtterance(phraseData.phrase);
     speech.lang = 'ru';
     window.speechSynthesis.speak(speech);
   }, [currentPhraseIteration]);
