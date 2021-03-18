@@ -23,12 +23,26 @@ const ExamplesTable = styled.table`
   font-size: ${Space[16]};
 `;
 
+const highlightPhrase = (sentence: string, phrase: string) => {
+  const partsWithoutPhrase = sentence.split(phrase);
+  const renderedParts = [];
+  for (let i = 0; i < partsWithoutPhrase.length; i++) {
+    if (i !== 0) {
+      renderedParts.push(<span className="font-bold">{phrase}</span>);
+    }
+    renderedParts.push(partsWithoutPhrase[i]);
+  }
+  return <>{renderedParts}</>;
+};
+
 interface DefinitionAndExamplesProps {
+  phrase: string;
   definitions?: string[];
   examples?: [string, string?][];
 }
 
 const DefinitionAndExamplesView: React.FC<DefinitionAndExamplesProps> = ({
+  phrase,
   definitions,
   examples,
 }) => {
@@ -41,7 +55,7 @@ const DefinitionAndExamplesView: React.FC<DefinitionAndExamplesProps> = ({
             {examples.map((ex) => {
               return (
                 <tr key={ex[0]}>
-                  <td>{ex[0]}</td>
+                  <td>{highlightPhrase(ex[0], phrase)}</td>
                   <td>{ex[1]}</td>
                 </tr>
               );

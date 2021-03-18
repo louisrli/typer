@@ -1,5 +1,5 @@
 import { combineReducers, createStore } from 'redux';
-import { MakeStore, createWrapper, HYDRATE } from 'next-redux-wrapper';
+import { MakeStore, createWrapper, HYDRATE, Context } from 'next-redux-wrapper';
 import { StateType } from 'typesafe-actions';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
@@ -18,7 +18,7 @@ export type RootState = StateType<typeof rootReducer>;
 const reducer = (state: RootState | undefined, action: any): RootState => {
   // Copied this from documentation for redux next wrapper.
   if (action.type === HYDRATE) {
-    const nextState: RootState = {
+    const nextState = {
       ...state, // use previous state
       ...action.payload, // apply delta from hydration
     };
@@ -28,7 +28,7 @@ const reducer = (state: RootState | undefined, action: any): RootState => {
 };
 
 // create a makeStore function
-const makeStore: MakeStore<RootState> = () => {
+const makeStore: MakeStore<RootState> = (context: Context) => {
   // https://github.com/fazlulkarimweb/with-next-redux-wrapper-redux-persist
   if (typeof window === 'undefined') {
     return createStore(reducer);
@@ -51,4 +51,4 @@ const makeStore: MakeStore<RootState> = () => {
 };
 
 // export an assembled wrapper
-export const wrapper = createWrapper<RootState>(makeStore, { debug: true });
+export const wrapper = createWrapper<RootState>(makeStore);

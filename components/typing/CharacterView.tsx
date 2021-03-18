@@ -1,13 +1,7 @@
-import styled from '@emotion/styled';
 import clsx from 'clsx';
 import React from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../../lib/store';
-import { Colors, Space } from '../common/Styles';
-
-const CharacterContainerDiv = styled.div<{ isError: boolean }>`
-  color: ${(props) => (props.isError ? Colors.red[600] : 'unset')}; ;
-`;
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -23,10 +17,17 @@ interface CharacterProps {
 const CharacterView: React.FC<
   CharacterProps & ReturnType<typeof mapStateToProps>
 > = ({ char, isCurrent, isLastKeyError }) => {
-  // We do a "hack" of replacing whitespace with a bunch to increase the visual
+  // We do a "hack" of replacing whitespace with multiple to increase the visual
   // spacing on whitespace chars.
+  const cursorArrow = (
+    <div className="-mt-1 text-base text-center select-none">&#9650;</div>
+  );
   return (
-    <CharacterContainerDiv isError={isLastKeyError && isCurrent}>
+    <div
+      className={clsx({
+        'text-red-600': isCurrent && isLastKeyError,
+      })}
+    >
       <span
         className={clsx({
           'font-bold': isCurrent,
@@ -35,10 +36,8 @@ const CharacterView: React.FC<
       >
         {char.replace(' ', '  ')}
       </span>
-      {isCurrent && (
-        <div className="-mt-1 text-base text-center select-none">&#9650;</div>
-      )}
-    </CharacterContainerDiv>
+      {isCurrent && cursorArrow}
+    </div>
   );
 };
 

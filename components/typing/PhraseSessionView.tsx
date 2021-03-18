@@ -82,11 +82,6 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     };
   }, [phraseData]);
 
-  React.useEffect(() => {
-    if (!phraseData.phrase) {
-    }
-  }, [currentPhraseIteration]);
-
   return (
     <div
       className={clsx([
@@ -108,6 +103,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
             numRequiredPhraseIterations={numRequiredPhraseIterations}
           />
           <DefinitionAndExamplesView
+            phrase={phraseData.phrase}
             definitions={phraseData.definitions}
             examples={phraseData.examples}
           />
