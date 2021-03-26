@@ -39,6 +39,7 @@ module.exports = {
     'react/no-unescaped-entities': 0,
     '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '_' }],
     'no-restricted-syntax': 0,
+    'jsx-a11y/anchor-is-valid': 0,
     'arrow-body-style': 0,
     '@typescript-eslint/no-misused-promises': 'error',
     'react/no-danger': 0,
