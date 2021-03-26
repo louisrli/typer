@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import React from 'react';
 import clsx from 'clsx';
-import { typingActions } from '../../reducers/typing';
+import { getRenderInfo, typingActions } from '../../reducers/typing';
 import PhraseView from './PhraseView';
 import DefinitionAndExamplesView from './TranslationAndExamplesView';
 import { RootState } from '../../lib/store';
@@ -34,41 +34,47 @@ const sayPhrase = (phrase: string) => {
   window.speechSynthesis.speak(speech);
 };
 
-const mapStateToProps = (state: RootState) => {
+type PhraseSessionOwnProps = {
+  corpusKey: string;
+};
+
+const mapStateToProps = (state: RootState, ownProps: PhraseSessionOwnProps) => {
   return {
-    phraseData:
-      state.typing.phrasePool[state.typing.currentPhraseIndex] || null,
-    currentCharIndex: state.typing.currentCharIndex,
-    currentPhraseIteration: state.typing.currentPhraseIteration,
+    progress: getRenderInfo(ownProps.corpusKey)(state.typing),
     numRequiredPhraseIterations: state.settings.numRequiredPhraseIterations,
-    corpusKey: state.typing.corpusKey,
   };
 };
 
 const mapDispatchToProps = {
   handleGameKeypress: typingActions.handleGameKeypress,
+  initializeCorpusProgress: typingActions.initializeCorpusProgress,
   handleStatKeypress: statsActions.handleStatKeypress,
   skipPhrase: typingActions.skipPhrase,
 };
 
 type PhraseSessionProps = ReturnType<typeof mapStateToProps> &
-  typeof mapDispatchToProps;
+  typeof mapDispatchToProps &
+  PhraseSessionOwnProps;
 
 const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   corpusKey,
-  phraseData,
-  currentCharIndex,
-  currentPhraseIteration,
   numRequiredPhraseIterations,
+  progress,
   handleGameKeypress,
   handleStatKeypress,
+  initializeCorpusProgress,
   skipPhrase,
 }) => {
   React.useEffect(() => {
-    // TODO(louisli): This should do some complex redux-persist here by key.
+    // If it doesn't exist, it means it wasn't loaded from redux persist. We
+    // need to start it.
+    if (!progress) {
+      initializeCorpusProgress(corpusKey);
+    }
   });
+
   React.useEffect(() => {
-    if (!phraseData) {
+    if (!progress || progress.phraseData) {
       return undefined;
     }
     const handler = (e: KeyboardEvent) => {
@@ -79,27 +85,44 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
       e.preventDefault();
       // Hotkey for speaking again.
       if (e.code === 'Backquote') {
-        sayPhrase(phraseData.phrase);
+        sayPhrase(progress.phraseData!.phrase);
         return;
       }
       handleGameKeypress(pressedKey, numRequiredPhraseIterations);
-      handleStatKeypress(pressedKey, phraseData.phrase, currentCharIndex);
+      handleStatKeypress(
+        pressedKey,
+        progress.phraseData!.phrase,
+        progress.currentCharIndex
+      );
     };
     document.addEventListener('keydown', handler);
 
     return () => {
       document.removeEventListener('keydown', handler);
     };
-  }, [phraseData, currentCharIndex, numRequiredPhraseIterations]);
+  }, [
+    progress && progress.phraseData,
+    progress && progress.currentCharIndex,
+    numRequiredPhraseIterations,
+  ]);
 
   React.useEffect(() => {
-    if (!phraseData) {
+    if (!progress || !progress.phraseData) {
       return;
     }
     // Repeat the phrase on every iteration.
-    sayPhrase(phraseData.phrase);
-  }, [currentPhraseIteration, phraseData]);
+    sayPhrase(progress.phraseData.phrase);
+  }, [
+    progress && progress.currentPhraseIteration,
+    progress && progress.phraseData,
+  ]);
 
+  if (!progress) {
+    // TODO(louisli)
+    return <>"Loading..."</>;
+  }
+
+  const { phraseData, currentPhraseIteration, currentCharIndex } = progress;
   return (
     <div
       className={clsx([

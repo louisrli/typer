@@ -1,5 +1,8 @@
 import produce from 'immer';
+import invariant from 'ts-invariant';
 import { ActionType, createAction, createReducer } from 'typesafe-actions';
+
+type CorpusKey = string;
 
 export interface PhraseData {
   phrase: string;
@@ -14,6 +17,16 @@ const setPhrasePool = createAction(
 
 const skipPhrase = createAction('SKIP_PHRASE')();
 
+const initializeCorpusProgress = createAction(
+  'INITIALIZE_CORPUS_PROGRESS',
+  (corpusKey: CorpusKey) => ({ corpusKey })
+)();
+
+const setCurrentCorpus = createAction(
+  'SET_CURRENT_CORPUS',
+  (corpusKey: CorpusKey) => ({ corpusKey })
+)();
+
 const handleGameKeypress = createAction(
   'HANDLE_GAME_KEY_PRESS',
   // JS "key" field.
@@ -27,11 +40,13 @@ export const typingActions = {
   handleGameKeypress,
   setPhrasePool,
   skipPhrase,
+  setCurrentCorpus,
+  initializeCorpusProgress,
 };
 
 type TypingActions = ActionType<typeof typingActions>;
 
-interface TypingState {
+interface CorpusTypingProgress {
   phrasePool: PhraseData[];
   // The current index of the phrase in phrase pool.
   currentPhraseIndex: number;
@@ -44,72 +59,120 @@ interface TypingState {
   hasErrorOnCurrentPhrase: boolean;
 }
 
+/**
+ * Similar to CorpusTypingProgress but only the information needed to render.
+ */
+interface CorpusRenderInfo {
+  // Empty when finished.
+  phraseData: PhraseData | null;
+  currentCharIndex: number;
+  currentPhraseIteration: number;
+}
+
+/**
+ * Selector for getting corpus render info.
+ */
+export const getRenderInfo = (corpusKey: CorpusKey) => (
+  state: TypingState
+): CorpusRenderInfo | null => {
+  const progress = state.progresses[corpusKey];
+  invariant(progress);
+  return {
+    phraseData: progress.phrasePool[progress.currentPhraseIndex] || null,
+    currentCharIndex: progress.currentCharIndex,
+    currentPhraseIteration: progress.currentPhraseIteration,
+  };
+};
+
+interface TypingState {
+  progresses: Record<CorpusKey, CorpusTypingProgress>;
+  // Just to be lazy about passing it to every action, set it as a state. Could
+  // be dangerous -- consider revisiting later.
+  currentCorpusKey: string | null;
+}
+
+const getProgress = (state: TypingState): CorpusTypingProgress => {
+  invariant(state.currentCorpusKey, 'Tried to update with no corpus key set.');
+  invariant(
+    state.progresses[state.currentCorpusKey!],
+    'Tried to update nonexisting corpus'
+  );
+  return state.progresses[state.currentCorpusKey!];
+};
+
 export const typingReducer = createReducer<TypingState, TypingActions>({
-  phrasePool: [
-    {
-      phrase: 'foo',
-      examples: [
-        ['example0 foo bar', 'translation0 foo bar'],
-        [
-          'example0 foo bar longer sentence maybe',
-          'translation0 foo bar ya ya biatches',
-        ],
-      ],
-      definitions: ['i am a definition'],
-    },
-  ],
-  currentPhraseIndex: 0,
-  currentPhraseIteration: 0,
-  currentCharIndex: 0,
-  isLastKeyError: false,
-  hasErrorOnCurrentPhrase: false,
+  progresses: {},
+  currentCorpusKey: null,
 })
+  .handleAction(initializeCorpusProgress, (state, action) =>
+    produce(state, (draft) => {
+      draft.progresses[action.payload.corpusKey] = {
+        phrasePool: [],
+        currentPhraseIndex: 0,
+        currentPhraseIteration: 0,
+        currentCharIndex: 0,
+        isLastKeyError: false,
+        hasErrorOnCurrentPhrase: false,
+      };
+    })
+  )
   .handleAction(handleGameKeypress, (state, action) =>
     produce(state, (draft) => {
-      const currentPhraseData = state.phrasePool[state.currentPhraseIndex];
+      const draftProgress = getProgress(draft);
+      const currentPhraseData =
+        draftProgress.phrasePool[draftProgress.currentPhraseIndex];
       if (!currentPhraseData) {
         return;
       }
 
-      const correctChar = currentPhraseData.phrase[state.currentCharIndex];
+      const correctChar =
+        currentPhraseData.phrase[draftProgress.currentCharIndex];
       if (!correctChar) {
         // TODO(louisli): this should be a fatal error
         return;
       }
 
       const isCorrectKey = action.payload.pressedKey === correctChar;
-      draft.isLastKeyError = !isCorrectKey;
+      draftProgress.isLastKeyError = !isCorrectKey;
       if (isCorrectKey) {
         const isOnLastCharacter =
-          draft.currentCharIndex === currentPhraseData.phrase.length - 1;
+          draftProgress.currentCharIndex ===
+          currentPhraseData.phrase.length - 1;
         if (isOnLastCharacter) {
-          draft.currentCharIndex = 0;
+          draftProgress.currentCharIndex = 0;
 
-          draft.currentPhraseIteration++;
+          draftProgress.currentPhraseIteration++;
           if (
-            draft.currentPhraseIteration ===
+            draftProgress.currentPhraseIteration ===
             action.meta.numRequiredPhraseIterations
           ) {
             // Move onto the next phrase.
-            draft.currentPhraseIteration = 0;
-            draft.currentPhraseIndex++;
+            draftProgress.currentPhraseIteration = 0;
+            draftProgress.currentPhraseIndex++;
           }
           // Implicit fallthrough branch -- stay on current phrase.
         } else {
-          draft.currentCharIndex++;
+          draftProgress.currentCharIndex++;
         }
       }
     })
   )
   .handleAction(setPhrasePool, (state, action) =>
     produce(state, (draft) => {
-      draft.phrasePool = action.payload.phrasePool;
+      const draftProgress = getProgress(draft);
+      draftProgress.phrasePool = action.payload.phrasePool;
     })
   )
   .handleAction(skipPhrase, (state) =>
     produce(state, (draft) => {
-      draft.currentPhraseIteration = 0;
-      draft.currentPhraseIndex++;
-      draft.currentCharIndex = 0;
+      const draftProgress = getProgress(draft);
+      draftProgress.currentPhraseIteration = 0;
+      draftProgress.currentPhraseIndex++;
+      draftProgress.currentCharIndex = 0;
+    })
+  )
+  .handleAction(setCurrentCorpus, (state, action) =>
+    produce(state, (draft) => {
+      draft.currentCorpusKey = action.payload.corpusKey;
     })
   );
