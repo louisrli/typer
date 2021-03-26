@@ -12,7 +12,7 @@ const StartView: React.FC = () => {
               href={{
                 pathname: '/play',
                 query: {
-                  corpus: info.queryKey,
+                  corpus: info.corpusKey,
                 },
               }}
             >

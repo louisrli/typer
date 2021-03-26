@@ -20,12 +20,15 @@ const topCharErrorsSelector = (state: RootState): string[] => {
     .slice(0, NUM_ERROR_CHARS_TO_SHOW);
 };
 
+// TODO(louisli): Needs to be per corpus as well.
 const mapStateToProps = (state: RootState) => {
   return {
     numCorrectKeyPresses: state.stats.numCorrectKeyPresses,
     numErrorKeyPresses: state.stats.numErrorKeyPresses,
     accuracyHistory: state.stats.accuracyHistory,
-    numWordsFinished: state.typing.currentPhraseIndex,
+    numWordsFinished:
+      state.typing.progresses[state.typing.currentCorpusKey || '']
+        ?.currentPhraseIndex || 0,
     topErrorChars: topCharErrorsSelector(state),
   };
 };

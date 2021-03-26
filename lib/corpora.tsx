@@ -16,7 +16,7 @@ interface CorpusInfo {
   url: string;
 }
 
-const Corpora: Record<string, CorpusInfo> = {
+export const Corpora: Record<string, CorpusInfo> = {
   RU_ADJ_NOUN_SWAP: {
     renderName: 'Russian most common adjective noun pairs',
     description:

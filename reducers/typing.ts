@@ -79,7 +79,9 @@ export const getRenderInfo = (corpusKey: CorpusKey) => (
   state: TypingState
 ): CorpusRenderInfo | null => {
   const progress = state.progresses[corpusKey];
-  invariant(progress);
+  if (!progress) {
+    return null;
+  }
   return {
     phraseData: progress.phrasePool[progress.currentPhraseIndex] || null,
     currentCharIndex: progress.currentCharIndex,
