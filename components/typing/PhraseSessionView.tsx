@@ -41,6 +41,7 @@ const mapStateToProps = (state: RootState) => {
     currentCharIndex: state.typing.currentCharIndex,
     currentPhraseIteration: state.typing.currentPhraseIteration,
     numRequiredPhraseIterations: state.settings.numRequiredPhraseIterations,
+    corpusKey: state.typing.corpusKey,
   };
 };
 
@@ -54,6 +55,7 @@ type PhraseSessionProps = ReturnType<typeof mapStateToProps> &
   typeof mapDispatchToProps;
 
 const PhraseSessionView: React.FC<PhraseSessionProps> = ({
+  corpusKey,
   phraseData,
   currentCharIndex,
   currentPhraseIteration,
@@ -62,6 +64,9 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   handleStatKeypress,
   skipPhrase,
 }) => {
+  React.useEffect(() => {
+    // TODO(louisli): This should do some complex redux-persist here by key.
+  });
   React.useEffect(() => {
     if (!phraseData) {
       return undefined;
