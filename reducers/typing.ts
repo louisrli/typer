@@ -19,7 +19,10 @@ const skipPhrase = createAction('SKIP_PHRASE')();
 
 const initializeCorpusProgress = createAction(
   'INITIALIZE_CORPUS_PROGRESS',
-  (corpusKey: CorpusKey) => ({ corpusKey })
+  (corpusKey: CorpusKey, phraseData?: PhraseData[]) => ({
+    corpusKey,
+    phraseData,
+  })
 )();
 
 const setCurrentCorpus = createAction(
@@ -107,7 +110,7 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
   .handleAction(initializeCorpusProgress, (state, action) =>
     produce(state, (draft) => {
       draft.progresses[action.payload.corpusKey] = {
-        phrasePool: [],
+        phrasePool: action.payload.phraseData || [],
         currentPhraseIndex: 0,
         currentPhraseIteration: 0,
         currentCharIndex: 0,

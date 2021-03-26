@@ -8,6 +8,7 @@ import { RootState } from '../../lib/store';
 import { statsActions } from '../../reducers/stats';
 import PhraseIterationProgressView from './PhraseIterationProgressView';
 import StatsView from './StatsView';
+import { loadCorpus } from '../../lib/corpora';
 
 // Not sure if there's a better way. We don't want things like alt-tabbing etc
 // to be counted.
@@ -68,10 +69,14 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   React.useEffect(() => {
     // If it doesn't exist, it means it wasn't loaded from redux persist. We
     // need to start it.
-    if (!progress) {
-      initializeCorpusProgress(corpusKey);
+    async function maybeLoadInitialData() {
+      if (!progress) {
+        const phrases = await loadCorpus(corpusKey);
+        initializeCorpusProgress(corpusKey, phrases);
+      }
     }
-  });
+    maybeLoadInitialData();
+  }, []);
 
   React.useEffect(() => {
     if (!progress || progress.phraseData) {
