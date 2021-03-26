@@ -12,6 +12,8 @@ const setPhrasePool = createAction(
   (phrasePool: PhraseData[]) => ({ phrasePool })
 )();
 
+const skipPhrase = createAction('SKIP_PHRASE')();
+
 const handleGameKeypress = createAction(
   'HANDLE_GAME_KEY_PRESS',
   // JS "key" field.
@@ -24,6 +26,7 @@ const handleGameKeypress = createAction(
 export const typingActions = {
   handleGameKeypress,
   setPhrasePool,
+  skipPhrase,
 };
 
 type TypingActions = ActionType<typeof typingActions>;
@@ -101,5 +104,12 @@ export const typingReducer = createReducer<TypingState, TypingActions>({
   .handleAction(setPhrasePool, (state, action) =>
     produce(state, (draft) => {
       draft.phrasePool = action.payload.phrasePool;
+    })
+  )
+  .handleAction(skipPhrase, (state) =>
+    produce(state, (draft) => {
+      draft.currentPhraseIteration = 0;
+      draft.currentPhraseIndex++;
+      draft.currentCharIndex = 0;
     })
   );

@@ -27,6 +27,13 @@ const IGNORED_KEYS = new Set([
   'CapsLock',
 ]);
 
+const sayPhrase = (phrase: string) => {
+  const speech = new SpeechSynthesisUtterance(phrase);
+  speech.rate = 0.8;
+  speech.lang = 'ru';
+  window.speechSynthesis.speak(speech);
+};
+
 const mapStateToProps = (state: RootState) => {
   return {
     phraseData:
@@ -40,6 +47,7 @@ const mapStateToProps = (state: RootState) => {
 const mapDispatchToProps = {
   handleGameKeypress: typingActions.handleGameKeypress,
   handleStatKeypress: statsActions.handleStatKeypress,
+  skipPhrase: typingActions.skipPhrase,
 };
 
 type PhraseSessionProps = ReturnType<typeof mapStateToProps> &
@@ -52,24 +60,21 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   numRequiredPhraseIterations,
   handleGameKeypress,
   handleStatKeypress,
+  skipPhrase,
 }) => {
   React.useEffect(() => {
     if (!phraseData) {
       return undefined;
     }
-    const speech = new SpeechSynthesisUtterance(phraseData.phrase);
-    speech.rate = 0.8;
-    speech.lang = 'ru';
-    window.speechSynthesis.speak(speech);
-
     const handler = (e: KeyboardEvent) => {
       const pressedKey = e.key;
       if (IGNORED_KEYS.has(pressedKey) || e.ctrlKey) {
         return;
       }
+      e.preventDefault();
       // Hotkey for speaking again.
       if (e.code === 'Backquote') {
-        window.speechSynthesis.speak(speech);
+        sayPhrase(phraseData.phrase);
         return;
       }
       handleGameKeypress(pressedKey, numRequiredPhraseIterations);
@@ -80,7 +85,15 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
     return () => {
       document.removeEventListener('keydown', handler);
     };
-  }, [phraseData]);
+  }, [phraseData, currentCharIndex, numRequiredPhraseIterations]);
+
+  React.useEffect(() => {
+    if (!phraseData) {
+      return;
+    }
+    // Repeat the phrase on every iteration.
+    sayPhrase(phraseData.phrase);
+  }, [currentPhraseIteration, phraseData]);
 
   return (
     <div
@@ -111,6 +124,9 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
       )}
       {!phraseData && <div>You've finished.</div>}
       <StatsView />
+      <button type="button" onClick={skipPhrase}>
+        Skip
+      </button>
     </div>
   );
 };

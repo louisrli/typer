@@ -3,24 +3,62 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { RootState } from '../../lib/store';
 
+const MIN_ERROR_OCCURRENCES = 3;
+const NUM_ERROR_CHARS_TO_SHOW = 5;
+
+const topCharErrorsSelector = (state: RootState): string[] => {
+  const entries: [string, number][] = [];
+  for (const char of Object.keys(state.stats.mistakesPerChar)) {
+    entries.push([char, state.stats.mistakesPerChar[char]]);
+  }
+  entries.sort((a, b) => {
+    return b[1] - a[1];
+  });
+  return entries
+    .filter((e) => e[1] > MIN_ERROR_OCCURRENCES)
+    .map((e) => e[0])
+    .slice(0, NUM_ERROR_CHARS_TO_SHOW);
+};
+
 const mapStateToProps = (state: RootState) => {
   return {
     numCorrectKeyPresses: state.stats.numCorrectKeyPresses,
     numErrorKeyPresses: state.stats.numErrorKeyPresses,
     accuracyHistory: state.stats.accuracyHistory,
     numWordsFinished: state.typing.currentPhraseIndex,
+    topErrorChars: topCharErrorsSelector(state),
   };
 };
 
 const BigStatisticView: React.FC<{
-  statistic: string | null;
+  statistic: React.ReactNode | null;
   unit: string;
-}> = ({ statistic, unit }) => {
+  // Text styles won't be applied, let child determine.
+  disableTextSizing?: boolean;
+}> = ({ statistic, unit, disableTextSizing }) => {
   return (
     <div className="flex flex-col items-center">
       <div className="mb-2 text-lg">{unit}</div>
-      <div className="text-3xl text-gray-600">{statistic || '-'}</div>
+      <div
+        className={clsx({
+          'text-gray-600': true,
+          'text-3xl': !disableTextSizing,
+        })}
+      >
+        {statistic || '-'}
+      </div>
     </div>
+  );
+};
+
+/**
+ * A nice little view of a character
+ */
+const FancyCharacterView: React.FC<{ char: string }> = ({ char }) => {
+  return (
+    <span className="px-1 py-0.5 mx-0.5 text-base text-center bg-gray-200 shadow-inner rounded-md bg-gradient-to-bl from-gray-100 inline-block">
+      {char}
+    </span>
   );
 };
 
@@ -28,6 +66,7 @@ const StatsView: React.FC<ReturnType<typeof mapStateToProps>> = ({
   numCorrectKeyPresses,
   numErrorKeyPresses,
   numWordsFinished,
+  topErrorChars,
 }) => {
   const accuracy =
     numCorrectKeyPresses + numErrorKeyPresses > 0
@@ -40,6 +79,15 @@ const StatsView: React.FC<ReturnType<typeof mapStateToProps>> = ({
         unit="Overall accuracy"
       />
       <BigStatisticView statistic={String(numWordsFinished)} unit="Completed" />
+      <BigStatisticView
+        disableTextSizing
+        statistic={
+          topErrorChars.length > 0
+            ? topErrorChars.map((c) => <FancyCharacterView char={c} />)
+            : null
+        }
+        unit="Needs work"
+      />
     </div>
   );
 };

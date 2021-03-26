@@ -29,6 +29,7 @@ const reducer = (state: RootState | undefined, action: any): RootState => {
 
 // create a makeStore function
 const makeStore: MakeStore<RootState> = (context: Context) => {
+  console.log(context);
   // https://github.com/fazlulkarimweb/with-next-redux-wrapper-redux-persist
   if (typeof window === 'undefined') {
     return createStore(reducer);
