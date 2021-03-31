@@ -51,6 +51,7 @@ const mapDispatchToProps = {
   initializeCorpusProgress: typingActions.initializeCorpusProgress,
   handleStatKeypress: statsActions.handleStatKeypress,
   skipPhrase: typingActions.skipPhrase,
+  setCurrentCorpus: typingActions.setCurrentCorpus,
 };
 
 type PhraseSessionProps = ReturnType<typeof mapStateToProps> &
@@ -64,6 +65,7 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
   handleGameKeypress,
   handleStatKeypress,
   initializeCorpusProgress,
+  setCurrentCorpus,
   skipPhrase,
 }) => {
   React.useEffect(() => {
@@ -76,10 +78,13 @@ const PhraseSessionView: React.FC<PhraseSessionProps> = ({
       }
     }
     maybeLoadInitialData();
+    // We assume that there is exactly one corpus at all times, and that's the
+    // one being shown by PhraseSessionView.
+    setCurrentCorpus(corpusKey);
   }, []);
 
   React.useEffect(() => {
-    if (!progress || progress.phraseData) {
+    if (!progress || !progress.phraseData) {
       return undefined;
     }
     const handler = (e: KeyboardEvent) => {
